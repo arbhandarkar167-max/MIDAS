@@ -1,0 +1,580 @@
+{% extends "classifier/base.html" %}
+
+{% block title %}
+MIDAS — Prediction Report #{{ prediction.pk }}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ── Page Header ── */
+    .result-header {
+        text-align: center;
+        padding: 32px 0 36px;
+    }
+
+    .result-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        background: rgba(99, 149, 255, 0.1);
+        border: 1px solid rgba(99, 149, 255, 0.2);
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--accent-blue);
+        margin-bottom: 14px;
+    }
+
+    .result-header h1 {
+        font-size: 2.3rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .result-header p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    /* ── Result Banner ── */
+    .result-banner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+        flex-wrap: wrap;
+        padding: 32px 36px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        margin-bottom: 28px;
+        box-shadow: var(--shadow);
+    }
+
+    .result-classification-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .result-label-meta {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        font-weight: 600;
+    }
+
+    .result-class-badge {
+        display: inline-block;
+        padding: 10px 28px;
+        border-radius: var(--radius-sm);
+        background: var(--accent-gradient);
+        color: white;
+        font-family: var(--font-heading);
+        font-size: 1.6rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 20px rgba(99, 149, 255, 0.35);
+    }
+
+    .result-confidence-box {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .confidence-ring {
+        position: relative;
+        width: 86px;
+        height: 86px;
+    }
+
+    .confidence-ring svg {
+        transform: rotate(-90deg);
+        width: 86px;
+        height: 86px;
+    }
+
+    .confidence-ring .bg {
+        fill: none;
+        stroke: var(--border-color);
+        stroke-width: 7;
+    }
+
+    .confidence-ring .fill {
+        fill: none;
+        stroke: url(#confidence-gradient);
+        stroke-width: 7;
+        stroke-linecap: round;
+        stroke-dasharray: 238;
+        transition: stroke-dashoffset 1.2s ease-in-out;
+    }
+
+    .confidence-value {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-family: var(--font-heading);
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .confidence-meta h4 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: var(--text-primary);
+    }
+
+    .confidence-meta p {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    .result-meta-time {
+        text-align: right;
+    }
+
+    .result-meta-time .date {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .result-meta-time .time {
+        font-size: 0.84rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    /* ── Images Section ── */
+    .images-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 28px;
+    }
+
+    .image-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .image-card-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.92rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .image-card-header .title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .image-card-header i {
+        color: var(--accent-blue);
+        font-size: 1.1rem;
+    }
+
+    .image-card-body {
+        padding: 20px;
+        text-align: center;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(11, 15, 25, 0.4);
+    }
+
+    .image-card-body img {
+        width: 100%;
+        max-width: 440px;
+        border-radius: var(--radius-sm);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        transition: transform 0.3s ease;
+    }
+
+    .image-card-body img:hover {
+        transform: scale(1.02);
+    }
+
+    .no-image-notice {
+        padding: 48px 24px;
+        text-align: center;
+        color: var(--text-muted);
+    }
+
+    .no-image-notice i {
+        font-size: 2.4rem;
+        margin-bottom: 12px;
+        display: block;
+    }
+
+    /* ── Heatmap Guide Bar ── */
+    .heatmap-bar {
+        padding: 14px 20px;
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .heatmap-gradient-strip {
+        width: 140px;
+        height: 8px;
+        border-radius: 4px;
+        background: linear-gradient(to right, #0000ff, #00ffff, #00ff00, #ffff00, #ff0000);
+    }
+
+    /* ── Clinical Advisory Card ── */
+    .clinical-advisory {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 26px 30px;
+        margin-bottom: 28px;
+        border-left: 4px solid var(--accent-blue);
+    }
+
+    .advisory-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .advisory-title i {
+        color: var(--accent-cyan);
+    }
+
+    .advisory-body {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        line-height: 1.65;
+    }
+
+    /* ── Patient & Lesion Metadata ── */
+    .info-section {
+        margin-bottom: 28px;
+    }
+
+    .info-section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .info-section-title i {
+        color: var(--accent-blue);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 14px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        padding: 16px 20px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        transition: var(--transition);
+    }
+
+    .info-item:hover {
+        border-color: var(--border-glow);
+    }
+
+    .info-item-label {
+        font-size: 0.74rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-bottom: 6px;
+    }
+
+    .info-item-value {
+        font-size: 1.02rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* ── Action Buttons ── */
+    .result-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 36px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .actions-left, .actions-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    /* ── Print Styles ── */
+    @media print {
+        body { background: white !important; color: black !important; }
+        .midas-nav, .midas-footer, .result-actions, .heatmap-bar, .result-badge { display: none !important; }
+        .midas-card, .result-banner, .image-card, .info-item, .clinical-advisory {
+            background: white !important;
+            border: 1px solid #ccc !important;
+            color: black !important;
+            box-shadow: none !important;
+        }
+        .result-class-badge {
+            background: #eee !important;
+            color: black !important;
+            border: 1px solid #aaa !important;
+        }
+        .gradient-text { -webkit-text-fill-color: black !important; color: black !important; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 860px) {
+        .images-section {
+            grid-template-columns: 1fr;
+        }
+
+        .result-banner {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .result-meta-time {
+            text-align: left;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hidden SVG gradient definition for confidence ring -->
+<svg width="0" height="0" style="position: absolute;">
+    <defs>
+        <linearGradient id="confidence-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#6395ff" />
+            <stop offset="50%" stop-color="#38bdf8" />
+            <stop offset="100%" stop-color="#a78bfa" />
+        </linearGradient>
+    </defs>
+</svg>
+
+<!-- Header -->
+<section class="result-header">
+    <div class="result-badge">
+        <i class="bi bi-file-earmark-medical"></i> Diagnostic Report #{{ prediction.pk }}
+    </div>
+    <h1 class="gradient-text">Prediction Result & Explanation</h1>
+    <p>Multimodal classification output with Grad-CAM visual interpretability heatmap</p>
+</section>
+
+<!-- Result Banner -->
+<div class="result-banner">
+    <div class="result-classification-group">
+        <span class="result-label-meta">Algorithmic Classification</span>
+        <div class="result-class-badge">{{ prediction.predicted_class }}</div>
+    </div>
+
+    {% if prediction.confidence is not None %}
+    <div class="result-confidence-box">
+        <div class="confidence-ring">
+            <svg viewBox="0 0 86 86">
+                <circle class="bg" cx="43" cy="43" r="38" />
+                <circle class="fill" cx="43" cy="43" r="38"
+                    style="stroke-dashoffset: calc(238 - (238 * {% widthratio prediction.confidence 1 100 %} / 100));" />
+            </svg>
+            <div class="confidence-value">{% widthratio prediction.confidence 1 100 %}%</div>
+        </div>
+        <div class="confidence-meta">
+            <h4>Confidence Metric</h4>
+            <p>Calculated softmax probability distribution</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="result-meta-time">
+        <div class="date">{{ prediction.created_at|date:"M d, Y" }}</div>
+        <div class="time"><i class="bi bi-clock"></i> {{ prediction.created_at|time:"H:i" }} UTC</div>
+    </div>
+</div>
+
+<!-- Clinical Advisory Card -->
+<div class="clinical-advisory">
+    <div class="advisory-title">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Clinical Decision Support Context</span>
+    </div>
+    <div class="advisory-body">
+        This evaluation was synthesized using multimodal fusion (EfficientNet-B0 visual representations combined with demographic priors). 
+        The prediction of <strong>{{ prediction.predicted_class }}</strong> should be corroborated with clinical physical inspection, patient evolution history, and dermoscopic criteria (ABCDE rule). Biopsy confirmation remains the reference standard.
+    </div>
+</div>
+
+<!-- Images -->
+<div class="images-section">
+    <!-- Original Image Card -->
+    <div class="image-card">
+        <div class="image-card-header">
+            <div class="title-wrap">
+                <i class="bi bi-image"></i>
+                <span>Original Lesion Photograph</span>
+            </div>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Source Capture</span>
+        </div>
+        <div class="image-card-body">
+            {% if prediction.image %}
+                <img
+                    src="{{ prediction.image.url }}"
+                    alt="Original lesion capture"
+                >
+            {% else %}
+                <div class="no-image-notice">
+                    <i class="bi bi-image"></i>
+                    Original image not available
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Grad-CAM Card -->
+    <div class="image-card">
+        <div class="image-card-header">
+            <div class="title-wrap">
+                <i class="bi bi-eye"></i>
+                <span>Grad-CAM Activation Heatmap</span>
+            </div>
+            <span style="font-size: 0.78rem; color: var(--accent-cyan);"><i class="bi bi-cpu"></i> Explainability</span>
+        </div>
+        <div class="image-card-body">
+            {% if prediction.gradcam_image %}
+                <img
+                    src="{{ prediction.gradcam_image.url }}"
+                    alt="Grad-CAM spatial heatmap explanation"
+                >
+            {% else %}
+                <div class="no-image-notice">
+                    <i class="bi bi-eye-slash"></i>
+                    Grad-CAM overlay image is currently unavailable.
+                </div>
+            {% endif %}
+        </div>
+        <div class="heatmap-bar">
+            <span>Activation Scale: Lower</span>
+            <div class="heatmap-gradient-strip"></div>
+            <span>Higher Attention</span>
+        </div>
+    </div>
+</div>
+
+<!-- Patient & Lesion Information -->
+<div class="info-section">
+    <h2 class="info-section-title">
+        <i class="bi bi-person-lines-fill"></i>
+        Associated Patient & Lesion Metadata
+    </h2>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <span class="info-item-label">Patient Age</span>
+            <span class="info-item-value">{{ prediction.age }} years</span>
+        </div>
+        <div class="info-item">
+            <span class="info-item-label">Biological Sex</span>
+            <span class="info-item-value">{{ prediction.get_gender_display }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-item-label">Fitzpatrick Phototype</span>
+            <span class="info-item-value">{{ prediction.fitzpatrick }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-item-label">Melanoma History</span>
+            <span class="info-item-value">{{ prediction.get_melanoma_history_display }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-item-label">Race / Heritage</span>
+            <span class="info-item-value">{{ prediction.race }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-item-label">Anatomical Site</span>
+            <span class="info-item-value">{{ prediction.location }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-item-label">Capture Distance</span>
+            <span class="info-item-value">{{ prediction.distance }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-item-label">Comparative Control</span>
+            <span class="info-item-value">
+                {% if prediction.is_control %}
+                    <span style="color: var(--accent-cyan);"><i class="bi bi-check-circle"></i> Yes</span>
+                {% else %}
+                    No
+                {% endif %}
+            </span>
+        </div>
+        <div class="info-item">
+            <span class="info-item-label">Lesion Length</span>
+            <span class="info-item-value">{{ prediction.length }} mm</span>
+        </div>
+        <div class="info-item">
+            <span class="info-item-label">Lesion Width</span>
+            <span class="info-item-value">{{ prediction.width }} mm</span>
+        </div>
+    </div>
+</div>
+
+<!-- Action Footer -->
+<div class="result-actions">
+    <div class="actions-left">
+        <a href="{% url 'classifier:predict' %}" class="btn-primary">
+            <i class="bi bi-plus-circle"></i> New Lesion Analysis
+        </a>
+        <a href="{% url 'classifier:history' %}" class="btn-secondary">
+            <i class="bi bi-clock-history"></i> Return to History
+        </a>
+    </div>
+
+    <div class="actions-right">
+        <button type="button" class="btn-secondary" onclick="window.print()">
+            <i class="bi bi-printer"></i> Print Report
+        </button>
+    </div>
+</div>
+
+{% endblock %}

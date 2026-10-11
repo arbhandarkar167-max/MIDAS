@@ -1,0 +1,881 @@
+{% extends 'classifier/base.html' %}
+
+{% block title %}
+About MIDAS — Multimodal Dermatological AI
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ── Page Header ── */
+    .about-header {
+        text-align: center;
+        padding: 48px 0 52px;
+        position: relative;
+    }
+
+    .about-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        background: rgba(99, 149, 255, 0.1);
+        border: 1px solid rgba(99, 149, 255, 0.2);
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--accent-blue);
+        margin-bottom: 20px;
+    }
+
+    .about-header h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 14px;
+        letter-spacing: -0.5px;
+    }
+
+    .about-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        max-width: 680px;
+        margin: 0 auto;
+        line-height: 1.7;
+    }
+
+    /* ── Section Titles ── */
+    .about-section {
+        margin-bottom: 64px;
+    }
+
+    .about-section-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .about-section-title i {
+        font-size: 1.3rem;
+        color: var(--accent-blue);
+    }
+
+    .about-section-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.94rem;
+        margin-bottom: 28px;
+    }
+
+    /* ── What is MIDAS ── */
+    .about-intro {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+        align-items: stretch;
+    }
+
+    .about-intro-text {
+        font-size: 0.96rem;
+        line-height: 1.8;
+        color: var(--text-secondary);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .about-intro-text p {
+        margin-bottom: 16px;
+    }
+
+    .about-intro-text strong {
+        color: var(--text-primary);
+    }
+
+    .about-highlights {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .highlight-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 18px 20px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        transition: var(--transition);
+    }
+
+    .highlight-item:hover {
+        border-color: var(--border-glow);
+        transform: translateX(4px);
+    }
+
+    .highlight-icon {
+        flex-shrink: 0;
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        font-size: 1.15rem;
+    }
+
+    .highlight-icon.blue { background: rgba(99, 149, 255, 0.12); color: var(--accent-blue); }
+    .highlight-icon.cyan { background: rgba(56, 189, 248, 0.12); color: var(--accent-cyan); }
+    .highlight-icon.purple { background: rgba(167, 139, 250, 0.12); color: var(--accent-purple); }
+    .highlight-icon.green { background: rgba(52, 211, 153, 0.12); color: var(--success); }
+
+    .highlight-item h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 3px;
+        color: var(--text-primary);
+    }
+
+    .highlight-item p {
+        font-size: 0.84rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* ── Technology Cards ── */
+    .tech-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+    }
+
+    .tech-card {
+        padding: 28px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tech-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--accent-gradient);
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .tech-card:hover {
+        border-color: var(--border-glow);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-glow);
+    }
+
+    .tech-card:hover::before {
+        opacity: 1;
+    }
+
+    .tech-card-icon {
+        font-size: 1.8rem;
+        margin-bottom: 14px;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: inline-block;
+    }
+
+    .tech-card h3 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .tech-card p {
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+        line-height: 1.65;
+    }
+
+    /* ── Multimodal Pipeline Visualization ── */
+    .pipeline-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 32px;
+        margin-bottom: 32px;
+    }
+
+    .pipeline-diagram {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr auto 1fr;
+        align-items: center;
+        gap: 16px;
+        margin: 24px 0 16px;
+    }
+
+    .pipeline-box {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 20px;
+        text-align: center;
+        transition: var(--transition);
+    }
+
+    .pipeline-box:hover {
+        border-color: var(--accent-blue);
+        transform: translateY(-2px);
+    }
+
+    .pipeline-box i {
+        font-size: 1.8rem;
+        color: var(--accent-cyan);
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .pipeline-box h5 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .pipeline-box p {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    .pipeline-arrow {
+        color: var(--accent-blue);
+        font-size: 1.4rem;
+        opacity: 0.7;
+    }
+
+    /* ── Table Styling ── */
+    .table-container {
+        overflow-x: auto;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+    }
+
+    .midas-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.88rem;
+    }
+
+    .midas-table th {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-weight: 600;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border-color);
+        white-space: nowrap;
+        font-family: var(--font-heading);
+    }
+
+    .midas-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        vertical-align: middle;
+    }
+
+    .midas-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .midas-table tr:hover td {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .condition-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .condition-badge.danger { background: rgba(248, 113, 113, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
+    .condition-badge.safe { background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3); }
+    .condition-badge.warning { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+    .condition-badge.info { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+
+    /* ── Fitzpatrick Grid ── */
+    .fitzpatrick-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 16px;
+    }
+
+    .fitz-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 20px;
+        display: flex;
+        gap: 16px;
+        transition: var(--transition);
+    }
+
+    .fitz-card:hover {
+        border-color: var(--border-glow);
+        transform: translateY(-2px);
+    }
+
+    .fitz-swatch {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .fitz-swatch.type-1 { background: #fdf0e6; }
+    .fitz-swatch.type-2 { background: #f7e0cf; }
+    .fitz-swatch.type-3 { background: #e5c3a6; }
+    .fitz-swatch.type-4 { background: #c59b7b; }
+    .fitz-swatch.type-5 { background: #8e5d3d; }
+    .fitz-swatch.type-6 { background: #4a3328; }
+
+    .fitz-details h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: var(--text-primary);
+    }
+
+    .fitz-details p {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* ── FAQ Accordion ── */
+    .faq-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .faq-item {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 22px 24px;
+        transition: var(--transition);
+    }
+
+    .faq-item:hover {
+        border-color: var(--border-glow);
+    }
+
+    .faq-question {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+    }
+
+    .faq-question i {
+        color: var(--accent-cyan);
+        font-size: 1.1rem;
+    }
+
+    .faq-answer {
+        font-size: 0.89rem;
+        color: var(--text-secondary);
+        line-height: 1.65;
+        padding-left: 28px;
+    }
+
+    /* ── Disclaimer ── */
+    .disclaimer {
+        padding: 28px 32px;
+        background: rgba(251, 191, 36, 0.05);
+        border: 1px solid rgba(251, 191, 36, 0.25);
+        border-radius: var(--radius);
+        margin-top: 56px;
+    }
+
+    .disclaimer-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--warning);
+        margin-bottom: 12px;
+    }
+
+    .disclaimer p {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        line-height: 1.7;
+    }
+
+    .disclaimer p + p {
+        margin-top: 10px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+        .pipeline-diagram {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .pipeline-arrow {
+            transform: rotate(90deg);
+            margin: 4px 0;
+        }
+
+        .about-intro {
+            grid-template-columns: 1fr;
+        }
+
+        .tech-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .about-header h1 {
+            font-size: 2.2rem;
+        }
+
+        .fitzpatrick-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<section class="about-header">
+    <div class="about-badge">
+        <i class="bi bi-cpu"></i> Clinical AI & Explainability
+    </div>
+    <h1 class="gradient-text">About MIDAS</h1>
+    <p>
+        The <strong>Multimodal Intelligent Dermatological Analysis System</strong> combines
+        high-resolution dermoscopic image processing with structured clinical patient variables
+        to assist healthcare professionals in dermatological risk assessment.
+    </p>
+</section>
+
+<!-- Section 1: Overview & Value Proposition -->
+<section class="about-section">
+    <h2 class="about-section-title">
+        <i class="bi bi-info-circle"></i>
+        <span class="gradient-text">System Overview</span>
+    </h2>
+    <p class="about-section-subtitle">Why multimodal integration advances dermatological AI</p>
+
+    <div class="about-intro">
+        <div class="about-intro-text">
+            <p>
+                Traditional computer vision models in dermatology analyze images in isolation,
+                ignoring critical contextual factors that clinicians routinely evaluate. In actual
+                clinical practice, a lesion's probability of malignancy depends heavily on
+                <strong>patient age, anatomical site, history of prior melanoma, and skin phototype</strong>.
+            </p>
+            <p>
+                <strong>MIDAS</strong> bridges this gap by implementing an <strong>end-to-end multimodal
+                architecture</strong>. The system simultaneously extracts fine-grained visual features
+                through deep convolutional networks while encoding tabular demographic and lesion
+                metadata into learned continuous embeddings.
+            </p>
+            <p>
+                By fusing these distinct data streams before classification, the model achieves
+                higher specificity and sensitivity, reducing false positives for benign lesions
+                that share visual similarities with early-stage malignancies.
+            </p>
+        </div>
+
+        <div class="about-highlights">
+            <div class="highlight-item">
+                <div class="highlight-icon blue"><i class="bi bi-diagram-3"></i></div>
+                <div>
+                    <h4>Multimodal Fusion Architecture</h4>
+                    <p>Integrates 1280-dim visual embeddings with structured patient demographic features.</p>
+                </div>
+            </div>
+            <div class="highlight-item">
+                <div class="highlight-icon cyan"><i class="bi bi-eye"></i></div>
+                <div>
+                    <h4>Explainable AI with Grad-CAM</h4>
+                    <p>Calculates spatial gradient heatmaps highlighting discriminative dermoscopic patterns.</p>
+                </div>
+            </div>
+            <div class="highlight-item">
+                <div class="highlight-icon purple"><i class="bi bi-shield-shaded"></i></div>
+                <div>
+                    <h4>Clinical Decision Support</h4>
+                    <p>Engineered to assist triage workflows and provide secondary algorithmic verification.</p>
+                </div>
+            </div>
+            <div class="highlight-item">
+                <div class="highlight-icon green"><i class="bi bi-lightning-charge"></i></div>
+                <div>
+                    <h4>Real-Time Inferencing</h4>
+                    <p>Optimized PyTorch inference pipeline producing predictions in under 2 seconds.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 2: Multimodal Architecture Pipeline -->
+<section class="about-section">
+    <h2 class="about-section-title">
+        <i class="bi bi-layers"></i>
+        <span class="gradient-text">The Multimodal Pipeline</span>
+    </h2>
+    <p class="about-section-subtitle">How image tensors and tabular metadata converge into classification</p>
+
+    <div class="pipeline-card">
+        <h4 style="font-size: 1.05rem; margin-bottom: 6px;">Joint Representation Learning</h4>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 20px;">
+            Input dermoscopy images are normalized and passed through EfficientNet-B0 while tabular features (age, sex, skin phototype, lesion site, diameter) are vector-encoded and fused into a unified latent space.
+        </p>
+
+        <div class="pipeline-diagram">
+            <div class="pipeline-box">
+                <i class="bi bi-image"></i>
+                <h5>Image Stream</h5>
+                <p>224×224 RGB Dermoscopy → EfficientNet-B0 Feature Extractor</p>
+            </div>
+
+            <div class="pipeline-arrow"><i class="bi bi-arrow-right"></i></div>
+
+            <div class="pipeline-box">
+                <i class="bi bi-intersect"></i>
+                <h5>Fusion Block</h5>
+                <p>Concatenation of 1280 Visual Features + Clinical Embeddings</p>
+            </div>
+
+            <div class="pipeline-arrow"><i class="bi bi-arrow-right"></i></div>
+
+            <div class="pipeline-box">
+                <i class="bi bi-check2-circle"></i>
+                <h5>Diagnostic Head</h5>
+                <p>7-Class Softmax Probabilities + Grad-CAM Spatial Heatmap</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="tech-grid">
+        <div class="tech-card">
+            <div class="tech-card-icon"><i class="bi bi-cpu"></i></div>
+            <h3>EfficientNet-B0 Feature Backbone</h3>
+            <p>
+                Leverages compound scaling (depth, width, and resolution) to extract high-level spatial
+                representations. EfficientNet-B0 minimizes parameter overhead while maintaining state-of-the-art
+                receptive field capabilities on fine-grained dermoscopic structures.
+            </p>
+        </div>
+
+        <div class="tech-card">
+            <div class="tech-card-icon"><i class="bi bi-sliders"></i></div>
+            <h3>Tabular Metadata Integration</h3>
+            <p>
+                Categorical variables (anatomical site, Fitzpatrick phototype, sex, melanoma family history)
+                are one-hot and ordinal encoded, while continuous dimensions (patient age, lesion length/width)
+                are standardized to zero-mean, unit-variance before dense projection.
+            </p>
+        </div>
+
+        <div class="tech-card">
+            <div class="tech-card-icon"><i class="bi bi-search"></i></div>
+            <h3>Grad-CAM Interpretability Engine</h3>
+            <p>
+                Gradient-weighted Class Activation Mapping computes the gradient of the predicted score
+                with respect to the final convolutional feature maps. This localizes the morphological
+                regions (e.g., atypical pigment networks, regression structures) guiding the classification.
+            </p>
+        </div>
+
+        <div class="tech-card">
+            <div class="tech-card-icon"><i class="bi bi-database-check"></i></div>
+            <h3>Benchmark Benchmark Curation</h3>
+            <p>
+                Trained on international benchmark dermatological repositories including the ISIC Archive
+                and HAM10000 dataset, encompassing over 10,000 histopathologically verified and expert-confirmed
+                lesion presentations across diverse demographics.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Section 3: Diagnostic Taxonomy (7 Conditions) -->
+<section class="about-section">
+    <h2 class="about-section-title">
+        <i class="bi bi-clipboard2-pulse"></i>
+        <span class="gradient-text">Diagnostic Taxonomy</span>
+    </h2>
+    <p class="about-section-subtitle">Detailed clinical criteria for the 7 lesion classes recognized by MIDAS</p>
+
+    <div class="table-container">
+        <table class="midas-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Diagnosis</th>
+                    <th>Risk Grade</th>
+                    <th>Common Anatomical Sites</th>
+                    <th>Key Dermoscopic Hallmarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="condition-badge danger">MEL</span></td>
+                    <td><strong>Melanoma</strong></td>
+                    <td><span style="color: #f87171; font-weight: 600;">High Risk (Malignant)</span></td>
+                    <td>Trunk, Lower Extremities, Head & Neck</td>
+                    <td>Asymmetry, atypical pigment network, irregular streaks, blue-white veil, multiple colors</td>
+                </tr>
+                <tr>
+                    <td><span class="condition-badge danger">BCC</span></td>
+                    <td><strong>Basal Cell Carcinoma</strong></td>
+                    <td><span style="color: #f87171; font-weight: 600;">High Risk (Malignant)</span></td>
+                    <td>Sun-exposed areas, Face, Scalp, Neck</td>
+                    <td>Arborizing (tree-like) telangiectasias, ulceration, blue-gray ovoid nests and globules</td>
+                </tr>
+                <tr>
+                    <td><span class="condition-badge warning">AKIEC</span></td>
+                    <td><strong>Actinic Keratosis / IEC</strong></td>
+                    <td><span style="color: #fbbf24; font-weight: 600;">Premalignant</span></td>
+                    <td>Face, Scalp, Forearms, Dorsum of Hands</td>
+                    <td>Erythematous background, keratotic follicular plugging, strawberry pattern, rosette signs</td>
+                </tr>
+                <tr>
+                    <td><span class="condition-badge safe">NV</span></td>
+                    <td><strong>Melanocytic Nevus</strong></td>
+                    <td><span style="color: #34d399; font-weight: 600;">Benign</span></td>
+                    <td>Trunk, Extremities, Generalized</td>
+                    <td>Uniform pigment network, regular globular patterns, symmetrical homogenous pigmentation</td>
+                </tr>
+                <tr>
+                    <td><span class="condition-badge safe">BKL</span></td>
+                    <td><strong>Benign Keratosis</strong></td>
+                    <td><span style="color: #34d399; font-weight: 600;">Benign</span></td>
+                    <td>Trunk, Face, Upper Back</td>
+                    <td>Milia-like cysts, comedo-like openings, cerebriform (brain-like) fissures, hairpin blood vessels</td>
+                </tr>
+                <tr>
+                    <td><span class="condition-badge info">DF</span></td>
+                    <td><strong>Dermatofibroma</strong></td>
+                    <td><span style="color: #38bdf8; font-weight: 600;">Benign</span></td>
+                    <td>Lower Extremities, Upper Arms</td>
+                    <td>Central white patch / scar-like area surrounded by a delicate peripheral pigment network</td>
+                </tr>
+                <tr>
+                    <td><span class="condition-badge info">VASC</span></td>
+                    <td><strong>Vascular Lesion</strong></td>
+                    <td><span style="color: #38bdf8; font-weight: 600;">Benign</span></td>
+                    <td>Trunk, Limbs, Mucosa</td>
+                    <td>Red, purple, or blue-black lacunae (lagons), absence of pigment network, hemorrhagic crusts</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- Section 4: Fitzpatrick Phototyping Reference -->
+<section class="about-section">
+    <h2 class="about-section-title">
+        <i class="bi bi-palette"></i>
+        <span class="gradient-text">Fitzpatrick Phototyping Scale</span>
+    </h2>
+    <p class="about-section-subtitle">How skin phototypes affect dermoscopic appearance and model calibration</p>
+
+    <div class="fitzpatrick-grid">
+        <div class="fitz-card">
+            <div class="fitz-swatch type-1"></div>
+            <div class="fitz-details">
+                <h4>Type I — Pale White</h4>
+                <p>Always sunburns easily, never tans. Typically accompanied by fair skin, blue/green eyes, and light blond or red hair.</p>
+            </div>
+        </div>
+
+        <div class="fitz-card">
+            <div class="fitz-swatch type-2"></div>
+            <div class="fitz-details">
+                <h4>Type II — Fair / Light</h4>
+                <p>Sunburns easily, tans with difficulty and minimal pigment. Usually blue/hazel eyes with blonde or brown hair.</p>
+            </div>
+        </div>
+
+        <div class="fitz-card">
+            <div class="fitz-swatch type-3"></div>
+            <div class="fitz-details">
+                <h4>Type III — Darker White / Medium</h4>
+                <p>Burns moderately, gradually tans to an olive or light brown tint. Fair to dark brown hair and eyes.</p>
+            </div>
+        </div>
+
+        <div class="fitz-card">
+            <div class="fitz-swatch type-4"></div>
+            <div class="fitz-details">
+                <h4>Type IV — Light Brown / Olive</h4>
+                <p>Burns minimally, tans readily to moderate brown. Mediterranean, Hispanic, or South Asian descent.</p>
+            </div>
+        </div>
+
+        <div class="fitz-card">
+            <div class="fitz-swatch type-5"></div>
+            <div class="fitz-details">
+                <h4>Type V — Dark Brown</h4>
+                <p>Rarely burns, tans profuse and deeply brown. Dark hair, dark eyes. Typical of Middle Eastern, Latin, or Asian backgrounds.</p>
+            </div>
+        </div>
+
+        <div class="fitz-card">
+            <div class="fitz-swatch type-6"></div>
+            <div class="fitz-details">
+                <h4>Type VI — Deeply Pigmented</h4>
+                <p>Never burns, deeply pigmented dark brown to black skin. African, Afro-Caribbean, or Indigenous descent.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 5: Best Practices for Image Acquisition -->
+<section class="about-section">
+    <h2 class="about-section-title">
+        <i class="bi bi-camera"></i>
+        <span class="gradient-text">Image Acquisition Guidelines</span>
+    </h2>
+    <p class="about-section-subtitle">Recommendations to ensure maximum model diagnostic fidelity</p>
+
+    <div class="midas-card">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px;">
+            <div>
+                <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 8px;">
+                    <i class="bi bi-aspect-ratio"></i> Central Alignment
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                    Ensure the lesion occupies approximately 50% to 70% of the active camera frame. Avoid positioning the lesion along the boundary edges.
+                </p>
+            </div>
+
+            <div>
+                <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 8px;">
+                    <i class="bi bi-brightness-high"></i> Polarized Lighting
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                    Use cross-polarized or liquid-immersion dermoscopy to eliminate surface stratum corneum reflection and visualize deeper subsurface pigment nets.
+                </p>
+            </div>
+
+            <div>
+                <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 8px;">
+                    <i class="bi bi-rulers"></i> Clean Visual Field
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                    Clip or displace dense terminal hairs where possible. Ensure immersion gel is free of micro-bubbles that can trigger false activation artifacts.
+                </p>
+            </div>
+
+            <div>
+                <h4 style="font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 8px;">
+                    <i class="bi bi-shield-check"></i> Accurate Metadata
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                    Always provide true patient age, anatomical location, and melanoma history, as these significantly recalibrate statistical baseline priors.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 6: Frequently Asked Questions -->
+<section class="about-section">
+    <h2 class="about-section-title">
+        <i class="bi bi-question-circle"></i>
+        <span class="gradient-text">Frequently Asked Questions</span>
+    </h2>
+    <p class="about-section-subtitle">Common technical and clinical inquiries</p>
+
+    <div class="faq-list">
+        <div class="faq-item">
+            <div class="faq-question">
+                <i class="bi bi-patch-question"></i>
+                How does metadata fusion affect classification accuracy?
+            </div>
+            <div class="faq-answer">
+                In empirical clinical evaluations, incorporating patient age, sex, and anatomical location reduces false positive rates by up to 15%. For example, certain benign keratoses common on older patients can visually mimic lentigo maligna; demographic context allows the model to appropriately adjust class probability weights.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <i class="bi bi-patch-question"></i>
+                How should Grad-CAM heatmaps be interpreted by clinicians?
+            </div>
+            <div class="faq-answer">
+                Grad-CAM heatmaps highlight areas with positive activation gradients. Warm hues (red and orange) indicate regions that contributed most strongly to the designated classification, such as atypical pigment networks or asymmetric globules. Cool hues (blue and purple) indicate background or non-contributory skin.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <i class="bi bi-patch-question"></i>
+                Can MIDAS analyze non-dermoscopic mobile phone photographs?
+            </div>
+            <div class="faq-answer">
+                Yes. The distance selector allows choosing "Virtual / Other", "6 inches", or "1 foot" captures. However, standard smartphone photos lack dermoscopic transillumination, so model confidence may be lower compared to standardized dermoscopic captures.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <i class="bi bi-patch-question"></i>
+                Is patient data stored securely or shared externally?
+            </div>
+            <div class="faq-answer">
+                All uploaded lesion images and metadata are processed locally on the secure host server. No patient telemetry, identifiable clinical records, or images are transmitted to external third-party cloud services.
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Disclaimer -->
+<div class="disclaimer">
+    <div class="disclaimer-title">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Medical Diagnostic & Regulatory Disclaimer
+    </div>
+    <p>
+        <strong>MIDAS is an algorithmic research and decision-support prototype.</strong> It is not approved by the FDA, CE, or any other healthcare regulatory authority as a standalone diagnostic medical device.
+    </p>
+    <p>
+        Under no circumstances should the numerical probabilities, confidence indicators, or Grad-CAM visualizations generated by MIDAS replace comprehensive clinical evaluation, physical dermoscopic examination, or surgical histopathology (biopsy). Any suspected lesion must be promptly evaluated by a licensed dermatologist or board-certified physician.
+    </p>
+</div>
+
+{% endblock %}

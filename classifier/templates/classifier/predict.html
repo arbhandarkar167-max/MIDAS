@@ -1,0 +1,646 @@
+{% extends "classifier/base.html" %}
+
+{% block title %}
+MIDAS — Skin Lesion Analysis & Inference
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ── Page Header ── */
+    .predict-header {
+        text-align: center;
+        padding: 36px 0 44px;
+    }
+
+    .predict-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        background: rgba(99, 149, 255, 0.1);
+        border: 1px solid rgba(99, 149, 255, 0.2);
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--accent-blue);
+        margin-bottom: 16px;
+    }
+
+    .predict-header h1 {
+        font-size: 2.4rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .predict-header p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        max-width: 620px;
+        margin: 0 auto;
+    }
+
+    /* ── Main Layout ── */
+    .predict-layout {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 32px;
+        align-items: start;
+    }
+
+    /* ── Form Card ── */
+    .predict-form-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 36px;
+        box-shadow: var(--shadow);
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text-primary);
+    }
+
+    .form-section-title i {
+        color: var(--accent-blue);
+        font-size: 1.15rem;
+    }
+
+    /* Grid for form inputs */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 20px;
+        margin-bottom: 28px;
+    }
+
+    .form-grid .form-field-full {
+        grid-column: 1 / -1;
+    }
+
+    /* ── Image Upload Dropzone & Live Preview ── */
+    .upload-zone-wrapper {
+        margin-bottom: 28px;
+    }
+
+    .custom-dropzone {
+        border: 2px dashed rgba(99, 149, 255, 0.35);
+        border-radius: var(--radius);
+        background: rgba(17, 24, 39, 0.4);
+        padding: 32px 24px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .custom-dropzone:hover,
+    .custom-dropzone.dragover {
+        border-color: var(--accent-cyan);
+        background: rgba(99, 149, 255, 0.08);
+        box-shadow: 0 0 24px rgba(56, 189, 248, 0.15);
+    }
+
+    .dropzone-icon {
+        font-size: 2.6rem;
+        color: var(--accent-blue);
+        margin-bottom: 12px;
+        display: inline-block;
+    }
+
+    .dropzone-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+    }
+
+    .dropzone-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 12px;
+    }
+
+    .dropzone-file-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 18px;
+        background: rgba(99, 149, 255, 0.15);
+        border: 1px solid rgba(99, 149, 255, 0.3);
+        border-radius: var(--radius-sm);
+        color: var(--accent-blue);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .dropzone-file-btn:hover {
+        background: var(--accent-blue);
+        color: white;
+    }
+
+    /* Image Preview Container */
+    .image-preview-container {
+        display: none;
+        margin-top: 18px;
+        padding: 18px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        align-items: center;
+        gap: 18px;
+    }
+
+    .image-preview-container.active {
+        display: flex;
+    }
+
+    .preview-thumb {
+        width: 100px;
+        height: 100px;
+        border-radius: var(--radius-sm);
+        object-fit: cover;
+        border: 1px solid var(--border-color);
+        background: #000;
+    }
+
+    .preview-info {
+        flex: 1;
+        text-align: left;
+    }
+
+    .preview-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+        word-break: break-all;
+    }
+
+    .preview-size {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .preview-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        background: rgba(52, 211, 153, 0.15);
+        color: var(--success);
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-top: 6px;
+    }
+
+    /* ── Checkbox Row ── */
+    .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .checkbox-row label {
+        margin: 0;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    /* ── Errors ── */
+    .non-field-errors {
+        padding: 14px 18px;
+        background: rgba(248, 113, 113, 0.1);
+        border: 1px solid rgba(248, 113, 113, 0.3);
+        border-radius: var(--radius-sm);
+        color: var(--danger);
+        font-size: 0.88rem;
+        margin-bottom: 24px;
+    }
+
+    /* ── Submit button ── */
+    .submit-container {
+        padding-top: 24px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 16px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    /* ── Sidebar Cards ── */
+    .predict-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .sidebar-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 24px;
+    }
+
+    .sidebar-card h3 {
+        font-size: 0.98rem;
+        font-weight: 600;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .sidebar-card h3 i {
+        color: var(--accent-cyan);
+    }
+
+    .tip-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .tip-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.55;
+    }
+
+    .tip-list li i {
+        color: var(--success);
+        font-size: 0.85rem;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
+    .format-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 12px 0 8px;
+    }
+
+    .format-pill {
+        padding: 4px 12px;
+        background: rgba(99, 149, 255, 0.12);
+        border: 1px solid rgba(99, 149, 255, 0.25);
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--accent-blue);
+    }
+
+    .alert-card {
+        padding: 16px 18px;
+        background: rgba(251, 191, 36, 0.06);
+        border: 1px solid rgba(251, 191, 36, 0.2);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .alert-card i {
+        color: var(--warning);
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .alert-card p {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        line-height: 1.55;
+        margin: 0;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+        .predict-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<section class="predict-header">
+    <div class="predict-badge">
+        <i class="bi bi-cpu"></i> Multimodal Inference Pipeline
+    </div>
+    <h1 class="gradient-text">Skin Lesion Analysis</h1>
+    <p>Upload a dermoscopic or clinical photograph and provide accompanying clinical variables for multimodal prediction.</p>
+</section>
+
+<div class="predict-layout">
+
+    <!-- Form Column -->
+    <div class="predict-form-card">
+        <form method="post" enctype="multipart/form-data" id="analysis-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="non-field-errors">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <!-- Section 1: Image Upload -->
+            <div class="upload-zone-wrapper">
+                <div class="form-section-title">
+                    <i class="bi bi-image"></i> Step 1: Lesion Photograph
+                </div>
+
+                <div class="custom-dropzone" id="dropzone" onclick="document.getElementById('{{ form.image.id_for_label }}').click()">
+                    <i class="bi bi-cloud-arrow-up dropzone-icon"></i>
+                    <div class="dropzone-title">Click to select image or drag & drop</div>
+                    <div class="dropzone-subtitle">High-resolution dermoscopic or macro clinical photograph (JPG, PNG)</div>
+                    <span class="dropzone-file-btn">
+                        <i class="bi bi-folder2-open"></i> Browse Files
+                    </span>
+                </div>
+
+                <!-- Hidden actual file input -->
+                <div style="display: none;">
+                    {{ form.image }}
+                </div>
+
+                {% for error in form.image.errors %}
+                    <p class="error" style="margin-top: 8px;">{{ error }}</p>
+                {% endfor %}
+
+                <!-- Live Preview Card -->
+                <div class="image-preview-container" id="preview-container">
+                    <img src="" alt="Selected Lesion" id="preview-img" class="preview-thumb">
+                    <div class="preview-info">
+                        <div class="preview-name" id="preview-filename">filename.jpg</div>
+                        <div class="preview-size" id="preview-filesize">0 KB</div>
+                        <span class="preview-badge"><i class="bi bi-check-circle"></i> Ready for Analysis</span>
+                    </div>
+                    <button type="button" class="btn-secondary" style="padding: 6px 14px; font-size: 0.8rem;" onclick="document.getElementById('{{ form.image.id_for_label }}').click()">
+                        Change
+                    </button>
+                </div>
+            </div>
+
+            <!-- Section 2: Patient Demographics -->
+            <div class="form-section-title">
+                <i class="bi bi-person-badge"></i> Step 2: Patient Demographics
+            </div>
+
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="{{ form.age.id_for_label }}">{{ form.age.label }}</label>
+                    {{ form.age }}
+                    {% for error in form.age.errors %}<p class="error">{{ error }}</p>{% endfor %}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.gender.id_for_label }}">{{ form.gender.label }}</label>
+                    {{ form.gender }}
+                    {% for error in form.gender.errors %}<p class="error">{{ error }}</p>{% endfor %}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.race.id_for_label }}">{{ form.race.label }}</label>
+                    {{ form.race }}
+                    {% for error in form.race.errors %}<p class="error">{{ error }}</p>{% endfor %}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.melanoma_history.id_for_label }}">{{ form.melanoma_history.label }}</label>
+                    {{ form.melanoma_history }}
+                    {% for error in form.melanoma_history.errors %}<p class="error">{{ error }}</p>{% endfor %}
+                </div>
+
+                <div class="form-field form-field-full">
+                    <label for="{{ form.fitzpatrick.id_for_label }}">{{ form.fitzpatrick.label }}</label>
+                    {{ form.fitzpatrick }}
+                    {% for error in form.fitzpatrick.errors %}<p class="error">{{ error }}</p>{% endfor %}
+                </div>
+            </div>
+
+            <!-- Section 3: Lesion Metadata -->
+            <div class="form-section-title">
+                <i class="bi bi-geo-alt"></i> Step 3: Lesion Characteristics
+            </div>
+
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
+                    {{ form.location }}
+                    {% for error in form.location.errors %}<p class="error">{{ error }}</p>{% endfor %}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.distance.id_for_label }}">{{ form.distance.label }}</label>
+                    {{ form.distance }}
+                    {% for error in form.distance.errors %}<p class="error">{{ error }}</p>{% endfor %}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.length.id_for_label }}">{{ form.length.label }}</label>
+                    {{ form.length }}
+                    {% for error in form.length.errors %}<p class="error">{{ error }}</p>{% endfor %}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ form.width.id_for_label }}">{{ form.width.label }}</label>
+                    {{ form.width }}
+                    {% for error in form.width.errors %}<p class="error">{{ error }}</p>{% endfor %}
+                </div>
+
+                <div class="form-field form-field-full">
+                    <div class="checkbox-row" onclick="document.getElementById('{{ form.is_control.id_for_label }}').click()">
+                        {{ form.is_control }}
+                        <label for="{{ form.is_control.id_for_label }}">
+                            Mark as Control Image (Comparative benign baseline)
+                        </label>
+                    </div>
+                    {% for error in form.is_control.errors %}<p class="error">{{ error }}</p>{% endfor %}
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="submit-container">
+                <button type="submit" class="submit-btn" id="submit-btn">
+                    <i class="bi bi-cpu"></i>
+                    Execute Multimodal Classification
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sidebar Column -->
+    <div class="predict-sidebar">
+        <div class="sidebar-card">
+            <h3><i class="bi bi-lightbulb"></i> Clinical Best Practices</h3>
+            <ul class="tip-list">
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    Center the lesion in the frame, occupying at least 50% of the field.
+                </li>
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    Use dermoscopic immersion or polarization to resolve pigment nets.
+                </li>
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    Avoid harsh flash reflections, blurry focus, or peripheral casting.
+                </li>
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    Accurately report lesion length and width in millimeters.
+                </li>
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    Record patient's true Fitzpatrick skin phototype for calibrated priors.
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-card">
+            <h3><i class="bi bi-file-earmark-image"></i> Image Requirements</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">
+                Accepted file formats:
+            </p>
+            <div class="format-pills">
+                <span class="format-pill">JPEG / JPG</span>
+                <span class="format-pill">PNG</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">
+                Maximum upload size: 10 MB per image.
+            </p>
+        </div>
+
+        <div class="alert-card">
+            <i class="bi bi-shield-exclamation"></i>
+            <p>
+                <strong>Research Prototype:</strong> Algorithmic predictions are probabilistic and generated for experimental decision support. Always seek clinical confirmation.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Live image preview and drag & drop support
+    const fileInput = document.getElementById('{{ form.image.id_for_label }}');
+    const dropzone = document.getElementById('dropzone');
+    const previewContainer = document.getElementById('preview-container');
+    const previewImg = document.getElementById('preview-img');
+    const previewFilename = document.getElementById('preview-filename');
+    const previewFilesize = document.getElementById('preview-filesize');
+    const submitBtn = document.getElementById('submit-btn');
+
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function handleFile(file) {
+        if (!file || !file.type.startsWith('image/')) return;
+        previewFilename.textContent = file.name;
+        previewFilesize.textContent = formatBytes(file.size);
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            previewContainer.classList.add('active');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                handleFile(this.files[0]);
+            }
+        });
+    }
+
+    // Drag and drop event listeners
+    if (dropzone) {
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove('dragover');
+            });
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            if (dt.files && dt.files[0]) {
+                fileInput.files = dt.files;
+                handleFile(dt.files[0]);
+            }
+        });
+    }
+
+    // Form submit loading feedback
+    const form = document.getElementById('analysis-form');
+    if (form) {
+        form.addEventListener('submit', function() {
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Running Multimodal Inference...';
+            submitBtn.style.opacity = '0.85';
+            submitBtn.style.pointerEvents = 'none';
+        });
+    }
+</script>
+{% endblock %}

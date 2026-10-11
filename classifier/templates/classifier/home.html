@@ -1,0 +1,627 @@
+{% extends "classifier/base.html" %}
+
+{% block title %}
+MIDAS — Multimodal Dermatological Analysis System
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ── Hero Section ── */
+    .hero {
+        text-align: center;
+        padding: 72px 0 64px;
+        position: relative;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 18px;
+        background: rgba(99, 149, 255, 0.1);
+        border: 1px solid rgba(99, 149, 255, 0.25);
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--accent-blue);
+        margin-bottom: 24px;
+    }
+
+    .hero-badge i {
+        font-size: 0.85rem;
+    }
+
+    .hero-title {
+        font-family: var(--font-heading);
+        font-size: 4.8rem;
+        font-weight: 700;
+        letter-spacing: 6px;
+        margin-bottom: 10px;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: titleGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes titleGlow {
+        from { filter: drop-shadow(0 0 15px rgba(99, 149, 255, 0.2)); }
+        to { filter: drop-shadow(0 0 30px rgba(56, 189, 248, 0.35)); }
+    }
+
+    .hero-acronym {
+        font-size: 1.15rem;
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+        letter-spacing: 1px;
+    }
+
+    .hero-acronym b {
+        color: var(--accent-cyan);
+    }
+
+    .hero-description {
+        font-size: 1.12rem;
+        color: var(--text-secondary);
+        max-width: 640px;
+        margin: 0 auto 36px;
+        line-height: 1.75;
+    }
+
+    .hero-actions {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    /* Floating orbs */
+    .hero-orb {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.12;
+        pointer-events: none;
+        animation: float 7s ease-in-out infinite;
+    }
+
+    .hero-orb-1 {
+        width: 240px;
+        height: 240px;
+        background: var(--accent-blue);
+        top: -40px;
+        left: 4%;
+        animation-delay: 0s;
+    }
+
+    .hero-orb-2 {
+        width: 160px;
+        height: 160px;
+        background: var(--accent-purple);
+        top: 60px;
+        right: 6%;
+        animation-delay: 2.5s;
+    }
+
+    .hero-orb-3 {
+        width: 100px;
+        height: 100px;
+        background: var(--accent-cyan);
+        bottom: 20px;
+        left: 12%;
+        animation-delay: 5s;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) scale(1); }
+        50% { transform: translateY(-24px) scale(1.04); }
+    }
+
+    /* ── Divider ── */
+    .section-divider {
+        width: 64px;
+        height: 3px;
+        background: var(--accent-gradient);
+        border-radius: 2px;
+        margin: 0 auto 52px;
+    }
+
+    /* ── How It Works ── */
+    .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-bottom: 16px;
+    }
+
+    .step-card {
+        text-align: center;
+        padding: 38px 26px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .step-card:hover {
+        border-color: var(--border-glow);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-glow);
+    }
+
+    .step-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--accent-gradient);
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 18px;
+    }
+
+    .step-icon {
+        font-size: 2.3rem;
+        margin-bottom: 14px;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .step-card h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .step-card p {
+        color: var(--text-secondary);
+        font-size: 0.89rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* ── Key Features ── */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .feature-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 18px;
+        padding: 26px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        transition: var(--transition);
+    }
+
+    .feature-card:hover {
+        border-color: var(--border-glow);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-glow);
+    }
+
+    .feature-icon {
+        flex-shrink: 0;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-size: 1.35rem;
+    }
+
+    .feature-icon.blue { background: rgba(99, 149, 255, 0.12); color: var(--accent-blue); }
+    .feature-icon.cyan { background: rgba(56, 189, 248, 0.12); color: var(--accent-cyan); }
+    .feature-icon.purple { background: rgba(167, 139, 250, 0.12); color: var(--accent-purple); }
+    .feature-icon.green { background: rgba(52, 211, 153, 0.12); color: var(--success); }
+
+    .feature-card h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .feature-card p {
+        color: var(--text-secondary);
+        font-size: 0.86rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* ── ABCDE Melanoma Guide ── */
+    .abcde-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px;
+    }
+
+    .abcde-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 24px 18px;
+        text-align: center;
+        transition: var(--transition);
+    }
+
+    .abcde-card:hover {
+        border-color: var(--accent-blue);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-glow);
+    }
+
+    .abcde-letter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: var(--accent-gradient);
+        color: white;
+        font-family: var(--font-heading);
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .abcde-card h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+    }
+
+    .abcde-card p {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* ── Stats Bar ── */
+    .stats-bar {
+        display: flex;
+        justify-content: center;
+        gap: 52px;
+        flex-wrap: wrap;
+        padding: 44px 0;
+        margin: 56px 0;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-family: var(--font-heading);
+        font-size: 2.2rem;
+        font-weight: 700;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-top: 6px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    /* ── Quick FAQ ── */
+    .faq-mini-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .faq-mini-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 22px 24px;
+    }
+
+    .faq-mini-card h4 {
+        font-size: 0.96rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+
+    .faq-mini-card h4 i {
+        color: var(--accent-cyan);
+    }
+
+    .faq-mini-card p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* ── CTA Section ── */
+    .cta-section {
+        text-align: center;
+        padding: 56px 0 24px;
+    }
+
+    .cta-section h2 {
+        font-size: 2rem;
+        margin-bottom: 12px;
+    }
+
+    .cta-section p {
+        color: var(--text-secondary);
+        margin-bottom: 28px;
+        font-size: 1.05rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+        .abcde-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .faq-mini-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 3.2rem;
+            letter-spacing: 4px;
+        }
+
+        .steps-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .abcde-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-bar {
+            gap: 32px;
+        }
+
+        .hero {
+            padding: 44px 0 36px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+
+    <div class="hero-badge">
+        <i class="bi bi-stars"></i>
+        Advanced Dermatological Intelligence
+    </div>
+
+    <h1 class="hero-title">MIDAS</h1>
+
+    <p class="hero-acronym">
+        <b>M</b>ultimodal <b>I</b>ntelligent <b>D</b>ermatological <b>A</b>nalysis <b>S</b>ystem
+    </p>
+
+    <p class="hero-description">
+        Transforming lesion analysis through deep learning. Fusing high-resolution dermoscopic
+        features with patient clinical metadata to provide rapid classification and explainable Grad-CAM heatmaps.
+    </p>
+
+    <div class="hero-actions">
+        <a href="{% url 'classifier:predict' %}" class="btn-primary">
+            <i class="bi bi-search"></i> Start Analysis
+        </a>
+        <a href="{% url 'classifier:about' %}" class="btn-secondary">
+            <i class="bi bi-info-circle"></i> Explore Science & System
+        </a>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- How It Works -->
+<section class="section">
+    <div style="text-align: center;">
+        <h2 class="section-title gradient-text">Workflow Overview</h2>
+        <p class="section-subtitle">How MIDAS processes multimodal inputs into actionable insights</p>
+    </div>
+
+    <div class="steps-grid">
+        <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-icon"><i class="bi bi-cloud-arrow-up"></i></div>
+            <h3>Upload Image & Metadata</h3>
+            <p>Upload a dermoscopic lesion image alongside patient demographics (age, sex, skin phototype, anatomical site).</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-icon"><i class="bi bi-cpu"></i></div>
+            <h3>Multimodal Deep Fusion</h3>
+            <p>EfficientNet-B0 extracts spatial visual features while dense layers project clinical metadata into a unified embedding.</p>
+        </div>
+
+        <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-icon"><i class="bi bi-clipboard2-pulse"></i></div>
+            <h3>Diagnostic & Explainable Report</h3>
+            <p>Receive classification predictions, confidence metrics, and an interpretability heatmap showing critical regions.</p>
+        </div>
+    </div>
+</section>
+
+<!-- The ABCDE Rule for Melanoma Assessment -->
+<section class="section">
+    <div style="text-align: center;">
+        <h2 class="section-title gradient-text">Clinical Assessment: The ABCDE Rule</h2>
+        <p class="section-subtitle">Standard dermatological criteria for recognizing suspicious melanocytic lesions</p>
+    </div>
+
+    <div class="abcde-grid">
+        <div class="abcde-card">
+            <div class="abcde-letter">A</div>
+            <h4>Asymmetry</h4>
+            <p>One half of the lesion does not match the other in shape, contour, or structure.</p>
+        </div>
+
+        <div class="abcde-card">
+            <div class="abcde-letter">B</div>
+            <h4>Border</h4>
+            <p>The edges are ragged, scalloped, notched, or poorly defined and blurry.</p>
+        </div>
+
+        <div class="abcde-card">
+            <div class="abcde-letter">C</div>
+            <h4>Color</h4>
+            <p>Pigmentation is not uniform. Shades of brown, black, white, red, or blue are present.</p>
+        </div>
+
+        <div class="abcde-card">
+            <div class="abcde-letter">D</div>
+            <h4>Diameter</h4>
+            <p>The lesion is typically larger than 6 mm (roughly pencil eraser size), though can be smaller.</p>
+        </div>
+
+        <div class="abcde-card">
+            <div class="abcde-letter">E</div>
+            <h4>Evolving</h4>
+            <p>The spot is actively changing in size, shape, surface elevation, color, or symptoms.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Key System Features -->
+<section class="section">
+    <div style="text-align: center;">
+        <h2 class="section-title gradient-text">Key Architecture Capabilities</h2>
+        <p class="section-subtitle">Engineered with modern computer vision and medical AI standards</p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon blue"><i class="bi bi-cpu"></i></div>
+            <div>
+                <h3>EfficientNet-B0 Vision Engine</h3>
+                <p>Calculates compound-scaled feature vectors, maintaining high receptive accuracy on subtle dermoscopic networks and streaks.</p>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon cyan"><i class="bi bi-eye"></i></div>
+            <div>
+                <h3>Grad-CAM Spatial Explainability</h3>
+                <p>Generates class activation heatmaps overlaid onto the source lesion so clinicians can verify what guided the algorithm.</p>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon purple"><i class="bi bi-sliders"></i></div>
+            <div>
+                <h3>Clinical Metadata Fusion</h3>
+                <p>Incorporates patient age, sex, Fitzpatrick skin phototype, lesion site, and melanoma history for personalized priors.</p>
+            </div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon green"><i class="bi bi-clock-history"></i></div>
+            <div>
+                <h3>Audit History & Tracking</h3>
+                <p>Chronological analysis archive enabling longitudinal comparison of patient records and past diagnostic overlays.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Platform Statistics -->
+<div class="stats-bar">
+    <div class="stat-item">
+        <div class="stat-value">7</div>
+        <div class="stat-label">Diagnostic Classes</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">EfficientNet-B0</div>
+        <div class="stat-label">Convolutional Backbone</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">Multimodal</div>
+        <div class="stat-label">Fusion Integration</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">&lt; 2s</div>
+        <div class="stat-label">Inference Latency</div>
+    </div>
+</div>
+
+<!-- FAQ Summary -->
+<section class="section">
+    <div style="text-align: center;">
+        <h2 class="section-title gradient-text">Common Inquiries</h2>
+        <p class="section-subtitle">Quick answers regarding the MIDAS classification system</p>
+    </div>
+
+    <div class="faq-mini-grid">
+        <div class="faq-mini-card">
+            <h4><i class="bi bi-check-circle"></i> What image formats are recommended?</h4>
+            <p>Dermoscopic images captured via contact or non-contact dermatoscopes yield the highest accuracy. Standard digital clinical macro photographs in JPG or PNG format under 10 MB are also fully supported.</p>
+        </div>
+
+        <div class="faq-mini-card">
+            <h4><i class="bi bi-shield-lock"></i> Is patient data confidential?</h4>
+            <p>Yes. MIDAS executes all model inference and data storage securely within the application server. No clinical records or images are transferred to third-party APIs.</p>
+        </div>
+
+        <div class="faq-mini-card">
+            <h4><i class="bi bi-file-earmark-medical"></i> Can this replace a skin biopsy?</h4>
+            <p>No. MIDAS is designed as an investigative decision-support and triage tool. Any suspicious, changing, or irregular lesion requires histopathologic confirmation by a licensed medical practitioner.</p>
+        </div>
+
+        <div class="faq-mini-card">
+            <h4><i class="bi bi-activity"></i> Which conditions does the model recognize?</h4>
+            <p>The system classifies lesions into 7 diagnostic categories: Melanoma (MEL), Basal Cell Carcinoma (BCC), Actinic Keratosis (AKIEC), Melanocytic Nevus (NV), Benign Keratosis (BKL), Dermatofibroma (DF), and Vascular Lesions (VASC).</p>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta-section">
+    <h2 class="gradient-text">Ready to Begin an Analysis?</h2>
+    <p>Upload a dermoscopic image and enter clinical parameters to generate a comprehensive prediction.</p>
+    <a href="{% url 'classifier:predict' %}" class="btn-primary">
+        <i class="bi bi-arrow-right-circle"></i> Launch Analysis Tool
+    </a>
+</section>
+
+{% endblock %}

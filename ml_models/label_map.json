@@ -1,0 +1,24 @@
+{
+  "label2idx": {
+    "melanocytic_nevus": 0,
+    "melanoma": 1
+  },
+  "idx2label": {
+    "0": "melanocytic_nevus",
+    "1": "melanoma"
+  },
+  "location2idx": {
+    "head_neck": 0,
+    "lower_extremity": 1,
+    "other": 2,
+    "trunk": 3,
+    "upper_extremity": 4
+  },
+  "race2idx": {
+    "asian": 0,
+    "black or african american": 1,
+    "other": 2,
+    "unknown": 3,
+    "white": 4
+  }
+}
